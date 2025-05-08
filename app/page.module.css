@@ -166,3 +166,136 @@ a.secondary {
     filter: invert();
   }
 }
+
+.buttonPanel {
+  width: 100%;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.buttonRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+}
+
+.customBtn {
+  width: 220px;
+  height: 64px;
+  font-size: 18px;
+  border-radius: 8px;
+  border-width: 2px;
+  border: 1.5px solid #bfc6d1;
+  background: #fff;
+  color: #222;
+  transition: all 0.2s;
+}
+
+.customBtn.selected {
+  background: #5b82e8;
+  color: #fff;
+  border-color: #5b82e8;
+}
+
+.smallBtn {
+  height: 40px;
+  font-size: 16px;
+  border-radius: 8px;
+  border-width: 2px;
+  border: 1.5px solid #bfc6d1;
+  background: #fff;
+  color: #222;
+  transition: all 0.2s;
+}
+
+.smallBtn.selected {
+  background: #5b82e8;
+  color: #fff;
+  border-color: #5b82e8;
+}
+
+.pagePadding {
+  padding: 32px;
+}
+
+.buttonRowSmall {
+  display: flex;
+  gap: 16px;
+}
+
+.buttonRowSmallJustify {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.buttonRowSmallLeft {
+  display: flex;
+  gap: 16px;
+}
+
+.buttonRowSmallWithAdd {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.buttonRowSmallAdd {
+  margin-left: auto;
+}
+
+.bottomTip {
+  margin-top: 24px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
+
+.tipLink {
+  color: #356ae6;
+  text-decoration: underline;
+  margin-left: 4px;
+}
+
+.addSourceModal .ant-modal-content {
+  border-radius: 12px;
+  padding: 0 0 24px 0;
+}
+.addSourceTitle {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-align: left;
+}
+.typeTips {
+  color: #e14c4c;
+  font-size: 14px;
+  margin-left: 8px;
+}
+.addSourceBtns {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 8px;
+}
+.addSourceSubmit {
+  min-width: 100px;
+  background: #356ae6;
+  border-color: #356ae6;
+}
+.addSourceCancel {
+  min-width: 100px;
+  background: #fff;
+  color: #222;
+  border: 1.5px solid #bfc6d1;
+}
+.addSourceModal .ant-modal-body {
+  padding: 24px 24px 0 24px;
+}
+.addSourceModal .ant-form-item-label > label {
+  font-weight: 500;
+}

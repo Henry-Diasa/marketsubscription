@@ -1,0 +1,17 @@
+.tableWrapper {
+  margin-top: 24px;
+  width: 100%;
+  overflow-x: auto;
+}
+.antdTable .ant-table {
+  background: #f8fbff;
+}
+.link {
+  color: #356ae6;
+  text-decoration: underline;
+  word-break: break-all;
+}
+.actionBtn {
+  margin-right: 8px;
+  padding: 0 8px;
+} 
