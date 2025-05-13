@@ -1,0 +1,132 @@
+/*
+ * @Author: diasa diasa@gate.me
+ * @Date: 2025-05-13 13:54:25
+ * @LastEditors: diasa diasa@gate.me
+ * @LastEditTime: 2025-05-13 17:38:05
+ * @FilePath: /marketsubscription/app/lib/api.js
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
+import axios from 'axios';
+
+// 创建axios实例
+const api = axios.create({
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// 请求拦截器
+api.interceptors.request.use(
+  (config) => {
+    // 在这里可以添加token等认证信息
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// 响应拦截器
+api.interceptors.response.use(
+  (response) => {
+    return response.data;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+// 导出api实例，以便在需要时直接使用
+export default api; 
+
+// 获取列表筛选项
+export const getInfoFlowConfig = async () => {
+    try {
+      const response = await api.get('/infoSub/infoFlowConfig');
+      return response;
+    } catch (error) {
+      throw error;
+    }
+};
+// 获取列表数据
+export const getInfoFlowList = async (data) => {
+    try {
+      const response = await api.post('/infoSub/infoFlowList', data);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+};
+// 新增数据来源
+export const addDataSource = async (data) => {
+    try {
+      const response = await api.post('/infoSub/addedSource', data);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+};
+// 查看数据范围
+export const getTwitterDataAll = async (data) => {
+    try {
+      const response = await api.post('/infoSub/twitterDataAll', data);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+};
+// 新增订阅
+export const addSubscription = async (data) => {
+    try {
+      const response = await api.post('/infoSub/addSub', data);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+};
+
+// 订阅列表
+export const getSubList = async () => {
+    try {
+      const response = await api.get('/infoSub/getSubList');
+      return response;
+    } catch (error) {
+      throw error;
+    }
+}
+// 订阅详情
+export const getSubInfo = async (subId) => {
+    try {
+      const response = await api.get(`/infoSub/getSubInfo?subId=${subId}`);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+}  
+// 删除订阅
+export const deleteSub = async (subId) => {
+    try {
+      const response = await api.post('/infoSub/delSubInfo', {subId});
+      return response;
+    } catch (error) {
+      throw error;
+    }
+} 
+// 新增twitter数据范围
+export const addTwitterScope = async (data) => {
+    try {
+      const response = await api.post('/infoSub/twitterDataAdd', data);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+}
+// 获取twitter数据范围列表
+export const getTwitterScope = async () => {
+    try {
+      const response = await api.get('/infoSub/twitterDataList');
+      return response;
+    } catch (error) {
+      throw error;
+    }
+}
