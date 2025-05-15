@@ -6,7 +6,7 @@ import { getInfoFlowConfig, getInfoFlowList, getTwitterDataAll } from '../../lib
 import styles from "./TablePanel.module.css";
 
 export default function TablePanel({ selectedSecond = '1' }) {
-  const [selectValue, setSelectValue] = useState(['']);
+  const [selectValue, setSelectValue] = useState(['0']);
   const [dateRange, setDateRange] = useState(null);
   const pageSize = 20;
   const [page, setPage] = useState(1);
@@ -30,13 +30,21 @@ export default function TablePanel({ selectedSecond = '1' }) {
   const [twitterScopeTotal, setTwitterScopeTotal] = useState(0);
   const [selectOptions, setSelectOptions] = useState([
     {
-      value: '',
+      value: '0',
       label: '全部'
     },
     {
       value: 'PANEWS',
       label: 'PANEWS'
-    }
+    },
+    {
+      value: 'PANEWS1',
+      label: 'PANEWS1'
+    },
+    {
+      value: 'PANEWS2',
+      label: 'PANEWS2'
+    },
   ]);
   const map = {
     1: "flashChannels",
@@ -57,7 +65,7 @@ export default function TablePanel({ selectedSecond = '1' }) {
         title: '原文链接',
         dataIndex: 'url',
         key: 'url',
-        width: 200,
+        width: 100,
         render: (text) => <a href={text} className={styles.link} target="_blank" rel="noopener noreferrer">查看</a>,
       },
       { title: '时间', dataIndex: 'publish_time', key: 'publish_time', width: 160 },
@@ -75,7 +83,7 @@ export default function TablePanel({ selectedSecond = '1' }) {
         title: '原文链接',
         dataIndex: 'url',
         key: 'url',
-        width: 200,
+        width: 100,
         render: (text) => <a href={text} className={styles.link} target="_blank" rel="noopener noreferrer">查看</a>,
       },
       { title: '时间', dataIndex: 'publish_time', key: 'publish_time', width: 160 },
@@ -92,7 +100,7 @@ export default function TablePanel({ selectedSecond = '1' }) {
         title: '原文链接',
         dataIndex: 'url',
         key: 'url',
-        width: 200,
+        width: 100,
         render: (text) => <a href={text} className={styles.link} target="_blank" rel="noopener noreferrer">查看</a>,
       },
       { title: '时间', dataIndex: 'publish_time', key: 'publish_time', width: 160 },
@@ -108,14 +116,14 @@ export default function TablePanel({ selectedSecond = '1' }) {
     { title: '内容', dataIndex: 'value', key: 'value', width: 240 },
   ];
 
-  const fetchData = async () => {
+  const fetchData = async (reset = false) => {
     const formData = new FormData();
     formData.append('type', selectedSecond);
     formData.append('page', page);
     formData.append('limit', pageSize);
-    formData.append('channel_name', selectValue);
-    formData.append('start_time', dateRange ? dateRange[0].format('YYYY-MM-DD HH:mm:ss') : '');
-    formData.append('end_time', dateRange ? dateRange[1].format('YYYY-MM-DD HH:mm:ss') : ''); 
+    formData.append('channel_name', reset ? '' : selectValue.join(','));
+    formData.append('start_time', reset ? '' : dateRange ? dateRange[0].format('YYYY-MM-DD HH:mm:ss') : '');
+    formData.append('end_time', reset ? '' : dateRange ? dateRange[1].format('YYYY-MM-DD HH:mm:ss') : ''); 
     setLoading(true);
     const response = await getInfoFlowList(formData)
     setTableData(response.data.list)
@@ -135,7 +143,7 @@ export default function TablePanel({ selectedSecond = '1' }) {
       label: item
     }));
     setSelectOptions([{
-      value: '',
+      value: '0',
       label: '全部'
     }, ...selectOptions]);
   }
@@ -148,7 +156,9 @@ export default function TablePanel({ selectedSecond = '1' }) {
   }, [selectedSecond, page])
 
   useEffect(() => {
-    handleDataScope()
+    if(dataScopeOpen) {
+      handleDataScope()
+    }
   }, [scopePage])
   const handleDateRangeChange = (dates) => {
     if (dates) {
@@ -166,12 +176,12 @@ export default function TablePanel({ selectedSecond = '1' }) {
     const formData = new FormData();
     formData.append('page', scopePage);
     formData.append('limit', scopePageSize);
+    setDataScopeOpen(true);
     setTwitterScopeLoading(true);
     const response = await getTwitterDataAll(formData);
     setTwitterScopeData(response.data.list);
     setTwitterScopeTotal(response.data.total);
     setTwitterScopeLoading(false);
-    setDataScopeOpen(true);
   }
   return (
     <div className={styles.tableWrapper}>
@@ -185,12 +195,10 @@ export default function TablePanel({ selectedSecond = '1' }) {
               options={selectOptions}
               className={styles.select}
               onChange={(value) => {
-                // If "全部" is selected (empty string), clear all other selections
-                if (value.includes('')) {
-                  setSelectValue(['']);
+                if (value[value.length - 1] === '0') {
+                  setSelectValue(['0']);
                 } else {
-                  // If other options are selected, remove "全部" from selection
-                  setSelectValue(value.filter(v => v !== ''));
+                  setSelectValue(value.filter(v => v !== '0'));
                 }
               }}
               mode="multiple"
@@ -211,7 +219,7 @@ export default function TablePanel({ selectedSecond = '1' }) {
               setSelectValue(['']);
               setDateRange(null);
               setPage(1);
-              fetchData();
+              fetchData(true);
             }}>重置</Button>
             {selectedSecond === '3' && (
               <Button className={styles.filterBtn} type="default" onClick={handleDataScope}>查看数据范围</Button>

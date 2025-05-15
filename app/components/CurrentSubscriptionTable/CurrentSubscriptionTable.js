@@ -2,12 +2,12 @@
  * @Author: diasa diasa@gate.me
  * @Date: 2025-05-08 16:32:52
  * @LastEditors: diasa diasa@gate.me
- * @LastEditTime: 2025-05-13 17:44:23
+ * @LastEditTime: 2025-05-15 15:07:37
  * @FilePath: /marketsubscription/app/components/CurrentSubscriptionTable/CurrentSubscriptionTable.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import React, {useEffect, useState} from "react";
-import { Table, Button } from "antd";
+import { Table, Button, message } from "antd";
 import { getSubList, deleteSub } from "../../lib/api";
 import styles from "./CurrentSubscriptionTable.module.css";
 
@@ -57,7 +57,7 @@ export default function CurrentSubscriptionTable({ handleEdit }) {
     },
   ];
   const fetchSubList = async () => {
-    // setLoading(true);
+    setLoading(true);
     const response = await getSubList();
     setSubList(Object.values(response.data));
     setLoading(false);
@@ -81,7 +81,7 @@ export default function CurrentSubscriptionTable({ handleEdit }) {
         <Table
           loading={loading}
           columns={columns}
-          dataSource={subList}
+          dataSource ={subList}
           pagination={{
             pageSize: 20,
             current: page,

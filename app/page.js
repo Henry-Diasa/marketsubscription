@@ -145,7 +145,7 @@ export default function Home() {
         >
           <Form layout="vertical" onFinish={handleSubmitDataSource}>
             <Form.Item
-              label={<span>类型 <span className={styles.typeTips}>快讯、公告、Twitter、其他</span></span>}
+              label={<span>类型</span>}
               name="type"
               rules={[{ required: true, message: '请选择类型' }]}
             >

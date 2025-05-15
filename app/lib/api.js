@@ -2,7 +2,7 @@
  * @Author: diasa diasa@gate.me
  * @Date: 2025-05-13 13:54:25
  * @LastEditors: diasa diasa@gate.me
- * @LastEditTime: 2025-05-13 17:38:05
+ * @LastEditTime: 2025-05-15 17:07:42
  * @FilePath: /marketsubscription/app/lib/api.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -112,21 +112,69 @@ export const deleteSub = async (subId) => {
       throw error;
     }
 } 
+
+
+// 新增关键词
+export const addSubKeyword = async (data) => {
+  try {
+    const response = await api.post('/infoSub/addSubKeyWord', data);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+// 删除关键词
+export const deleteSubKeyword = async (data) => {
+  try {
+    const response = await api.post('/infoSub/delSubKeyWord', data);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+// 编辑关键词
+export const editSubKeyword = async (data) => {
+  try {
+    const response = await api.post('/infoSub/uptSubKeyWord', data);
+    return response;
+  } catch (error) { 
+    throw error;
+  }
+}
+
+// 删除twitter数据源
+export const deleteTwitterScope = async (data) => {
+  try {
+    const response = await api.post('/infoSub/twitterDataDel', data);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+// 更新twitter数据源
+export const updateTwitterScope = async (data) => {
+  try {
+    const response = await api.post('/infoSub/twitterDataUpt', data);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
 // 新增twitter数据范围
 export const addTwitterScope = async (data) => {
-    try {
-      const response = await api.post('/infoSub/twitterDataAdd', data);
-      return response;
-    } catch (error) {
-      throw error;
-    }
+  try {
+    const response = await api.post('/infoSub/twitterDataAdd', data);
+    return response;
+  } catch (error) {
+    throw error;
+  }
 }
-// 获取twitter数据范围列表
+// 获取twitter数据源列表
 export const getTwitterScope = async () => {
-    try {
-      const response = await api.get('/infoSub/twitterDataList');
-      return response;
-    } catch (error) {
-      throw error;
-    }
+  try {
+    const response = await api.get('/infoSub/twitterDataList');
+    return response;
+  } catch (error) {
+    throw error;
+  }
 }

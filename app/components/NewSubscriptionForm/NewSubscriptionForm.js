@@ -2,52 +2,54 @@
  * @Author: diasa diasa@gate.me
  * @Date: 2025-05-08 15:45:07
  * @LastEditors: diasa diasa@gate.me
- * @LastEditTime: 2025-05-13 17:45:00
+ * @LastEditTime: 2025-05-15 16:55:10
  * @FilePath: /marketsubscription/app/components/NewSubscriptionForm.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import React, { useState, useEffect } from "react";
 import { Form, Select, Input, Button, message, Spin } from "antd";
-import { addSubscription, getSubInfo } from "../../lib/api";
+import { addSubscription, getSubInfo, deleteSubKeyword, editSubKeyword, addSubKeyword } from "../../lib/api";
 import styles from "./NewSubscriptionForm.module.css";
 
 
 
 const keywordTypeOptionsMap = {
   1: [
-    { value: 'all', label: '全部' },
-    { value: 'title', label: '标题' },
-    { value: 'content', label: '内容' },
-    { value: 'media', label: '媒体' },
-    { value: 'link', label: '链接' },
+    { value: 0, label: '全部' },
+    { value: 1, label: '标题' },
+    { value: 2, label: '内容' },
+    { value: 3, label: '媒体' },
+    { value: 6, label: '链接' },
   ],
   2: [
-    { value: 'all', label: '全部' },
-    { value: 'title', label: '标题' },
-    { value: 'content', label: '内容' },
-    { value: 'exchange', label: '交易所' },
-    { value: 'link', label: '链接' },
+    { value: 0, label: '全部' },
+    { value: 1, label: '标题' },
+    { value: 2, label: '内容' },
+    { value: 4, label: '交易所' },
+    { value: 6, label: '链接' },
   ],
   3: [
-    { value: 'all', label: '全部' },
-    { value: 'content', label: '内容' },
-    { value: 'username', label: '用户名' },
-    { value: 'link', label: '链接' },
+    { value: 0, label: '全部' },
+    { value: 2, label: '内容' },
+    { value: 5, label: '用户名' },
+    { value: 6, label: '链接' },
   ],
 };
 
 export default function NewSubscriptionForm({ handleAddSuccess, subId }) {
   const typeOptions = [
-    { value: '1', label: '快讯' },
-    { value: '2', label: '公告' },
-    { value: '3', label: 'Twitter' },
+    { value: 1, label: '快讯' },
+    { value: 2, label: '公告' },
+    { value: 3, label: 'Twitter' },
   ];
   const [loading, setLoading] = useState(false);
-  const [type, setType] = useState('1');
+  const [type, setType] = useState(1);
   const [webhook, setWebhook] = useState('');
   const keywordTypeOptions = keywordTypeOptionsMap[type];
+  const [sourceKeywords, setSourceKeywords] = useState([]);
   const [keywords, setKeywords] = useState([
-    { types: [], value: '' }
+    { types: [1], value: '1' },
+    { types: [2], value: '2' },
   ]);
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -62,14 +64,21 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId }) {
     const {subscription_type: type, webhook_url: webhook} = response.data.subInfo
     let keywordList = response.data.keywordList
     keywordList = keywordList.map(item => ({
-      types: [item.keyword_scope],
-      value: item.keyword
+      types: item.keyword_scope.split(','),
+      value: item.keyword,
+      id: item.id
     }))
     setType(type)
     setWebhook(webhook)
     setKeywords(keywordList)
+    setSourceKeywords(keywordList)
   }
   const handleKeywordTypeChange = (types, idx) => {
+    if(types[types.length - 1] === 0) {
+      types = [0]
+    }else{
+      types = types.filter(item => item !== 0)
+    }
     setKeywords(prev => prev.map((item, i) => i === idx ? { ...item, types } : item));
   };
   const handleKeywordValueChange = (e, idx) => {
@@ -82,24 +91,93 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId }) {
       messageApi.error('最多只能添加10个关键词');
     }
   };
-  const handleRemoveKeyword = (idx) => {
-    setKeywords(prev => prev.filter((_, i) => i !== idx));
+  const handleRemoveKeyword = async (idx) => {
+    const id = keywords[idx].id
+    if(id) {
+      setLoading(true)  
+      const response = await deleteSubKeyword({subId,keywordId: id})
+      if(response.code === 200) {
+        messageApi.success('删除成功');
+        setKeywords(prev => prev.filter((_, i) => i !== idx))
+      } else {
+        messageApi.error('删除失败');
+      }
+      setLoading(false)
+    }else{
+      setKeywords(prev => prev.filter((_, i) => i !== idx))
+    } 
   };
 
   const handleFinish = async ({type, webhook}) => {
-    const data = {
+    let data = {
       subType: type,
       webHookUrl: webhook,  
       keywords: keywords.map(item => ({
-        keywordType: item.types,
+        keywordType: item.types.join(','),
         keyword: item.value
       }))
     };
-    // 编辑
-    if(subId) {
-      data.subId = subId
-    }
     setLoading(true);
+    // 处理关键词的新增和编辑
+    const newKeywords = keywords.filter(item => !item.id).map(item => ({
+      keywordType: item.types.join(','),
+      keyword: item.value
+    }));
+    
+    const modifiedKeywords = keywords
+      .filter(item => item.id)
+      .filter(item => {
+        const sourceItem = sourceKeywords.find(source => source.id === item.id);
+        return sourceItem && (
+          sourceItem.types.join(',') !== item.types.join(',') ||
+          sourceItem.value !== item.value
+        );
+      })
+      .map(item => ({
+        keywordType: item.types.join(','),
+        keyword: item.value,
+        id: item.id
+      }));
+
+    // 更新订阅
+    if(subId) {
+      data = {
+        ...data,
+        subId
+      }
+      const updateKeys = [...newKeywords, ...modifiedKeywords]
+      try {
+        const promises = updateKeys.map(async (item) => {
+          try {
+            const formData = new FormData()
+            formData.append('subId', subId)
+            if(item.id) {
+              formData.append('keywordId', item.id)
+            }
+            formData.append('keyword_scope', item.keywordType)
+            formData.append('keyword', item.keyword)
+            
+            const response = item.id ? 
+              await editSubKeyword(formData) : 
+              await addSubKeyword(formData)
+            
+            if (response.code !== 200) {
+              throw new Error(item.id ? '更新关键词失败' : '新增关键词失败')
+            }
+            return response
+          } catch (error) {
+            messageApi.error(`${item.keyword}: ${error.message}`)
+            return null
+          }
+        })
+
+        await Promise.all(promises)
+      } catch (error) {
+        messageApi.error('关键词处理失败')
+        setLoading(false)
+        return
+      }
+    }
     const response = await addSubscription(data);
     if (response.code === 200) {
       messageApi.success('订阅成功');
