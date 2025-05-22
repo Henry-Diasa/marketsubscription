@@ -2,12 +2,12 @@
  * @Author: diasa diasa@gate.me
  * @Date: 2025-05-08 16:32:52
  * @LastEditors: diasa diasa@gate.me
- * @LastEditTime: 2025-05-15 15:07:37
+ * @LastEditTime: 2025-05-20 21:06:40
  * @FilePath: /marketsubscription/app/components/CurrentSubscriptionTable/CurrentSubscriptionTable.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import React, {useEffect, useState} from "react";
-import { Table, Button, message } from "antd";
+import { Table, Button, message, Popconfirm } from "antd";
 import { getSubList, deleteSub } from "../../lib/api";
 import styles from "./CurrentSubscriptionTable.module.css";
 
@@ -16,6 +16,7 @@ const typeMap = {
   1: '快讯',
   2: '公告',
   3: 'Twitter',
+  4: '新闻',
 }
 
 
@@ -23,15 +24,7 @@ export default function CurrentSubscriptionTable({ handleEdit }) {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [subList, setSubList] = useState([
-    {
-      key: 1,
-      subscription_type: 1,
-      keyword: 'C2C,P2P,法币',
-      webhook_url: 'https://open.larksuite.com/open-apis/bot/v2/hook/eg9db02c9-da30-4c7f-961d-8332ed130607',
-    },
-    
-  ]);
+  const [subList, setSubList] = useState([]);
   const [messageApi, contextHolder] = message.useMessage();
 
   const columns = [
@@ -51,7 +44,10 @@ export default function CurrentSubscriptionTable({ handleEdit }) {
       render: (_, record) => (
         <>
           <Button type="link" className={styles.actionBtn} onClick={() => handleEdit(record)}>编辑</Button>
-          <Button type="link" className={styles.actionBtn} danger onClick={() => handleDelete(record)}>删除</Button>
+          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(record)}  okText="确认"
+    cancelText="取消">
+            <Button type="link" className={styles.actionBtn} danger>删除</Button>
+          </Popconfirm>
         </>
       ),
     },
@@ -63,7 +59,9 @@ export default function CurrentSubscriptionTable({ handleEdit }) {
     setLoading(false);
   }
   const handleDelete = async (record) => {
-    const response = await deleteSub(record.subId);
+    const formData = new FormData();
+    formData.append('subId', record.subId);
+    const response = await deleteSub(formData);
     if(response.code === 200) {
       messageApi.success('删除成功');
       fetchSubList();

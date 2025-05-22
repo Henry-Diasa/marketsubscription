@@ -2,7 +2,7 @@
  * @Author: diasa diasa@gate.me
  * @Date: 2025-05-13 13:54:25
  * @LastEditors: diasa diasa@gate.me
- * @LastEditTime: 2025-05-15 17:07:42
+ * @LastEditTime: 2025-05-21 10:09:00
  * @FilePath: /marketsubscription/app/lib/api.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -11,15 +11,19 @@ import axios from 'axios';
 // 创建axios实例
 const api = axios.create({
   timeout: 10000,
+  baseURL: 'http://54.238.193.37:8081',
   headers: {
-    'Content-Type': 'application/json',
+    // 'Content-Type': 'application/json',
   },
 });
 
 // 请求拦截器
 api.interceptors.request.use(
   (config) => {
-    // 在这里可以添加token等认证信息
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `${token}`;
+    }
     return config;
   },
   (error) => {
@@ -84,7 +88,15 @@ export const addSubscription = async (data) => {
       throw error;
     }
 };
-
+// 更新订阅
+export const updateSubscription = async (data) => {
+  try {
+    const response = await api.post('/infoSub/uptSub', data);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
 // 订阅列表
 export const getSubList = async () => {
     try {
@@ -95,18 +107,18 @@ export const getSubList = async () => {
     }
 }
 // 订阅详情
-export const getSubInfo = async (subId) => {
+export const getSubInfo = async (data) => {
     try {
-      const response = await api.get(`/infoSub/getSubInfo?subId=${subId}`);
+      const response = await api.post('/infoSub/getSubInfo', data);
       return response;
     } catch (error) {
       throw error;
     }
 }  
 // 删除订阅
-export const deleteSub = async (subId) => {
+export const deleteSub = async (data) => {
     try {
-      const response = await api.post('/infoSub/delSubInfo', {subId});
+      const response = await api.post('/infoSub/delSubInfo', data);
       return response;
     } catch (error) {
       throw error;
@@ -173,6 +185,16 @@ export const addTwitterScope = async (data) => {
 export const getTwitterScope = async () => {
   try {
     const response = await api.get('/infoSub/twitterDataList');
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// 获取token
+export const getToken = async (data) => {
+  try {
+    const response = await api.post(`/infoSub/login`, data);
     return response;
   } catch (error) {
     throw error;

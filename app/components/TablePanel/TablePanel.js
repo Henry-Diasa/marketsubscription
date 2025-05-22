@@ -5,7 +5,7 @@ import { ReloadOutlined } from '@ant-design/icons';
 import { getInfoFlowConfig, getInfoFlowList, getTwitterDataAll } from '../../lib/api';
 import styles from "./TablePanel.module.css";
 
-export default function TablePanel({ selectedSecond = '1' }) {
+export default function TablePanel({ selectedSecond = '1', token }) {
   const [selectValue, setSelectValue] = useState(['0']);
   const [dateRange, setDateRange] = useState(null);
   const pageSize = 20;
@@ -15,16 +15,7 @@ export default function TablePanel({ selectedSecond = '1' }) {
   const [dataScopeOpen, setDataScopeOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [twitterScopeLoading, setTwitterScopeLoading] = useState(false);
-  const [tableData, setTableData] = useState([
-    {
-      key: 1,
-      channel_name: 'asdasd',
-      title: "PANEWS",
-      content: "美股收盘：美股收盘：三大股指再度大跌，特斯拉挫逾7%...美股收盘：三美股收盘：三大股指再度大跌，特斯拉挫逾7%...美股收盘：三大股指再度大跌，特斯拉挫逾7%...大股指再度大跌，特斯拉挫逾7%...美股收盘：三大股指再度大跌，特斯拉挫逾7%...美股收盘：三大股指再度大跌，特斯拉挫逾7%...美股收盘：三大股指再度大跌，特斯拉挫逾7%...美股收盘：三大股指再度大跌，特斯拉挫逾7%...美股收盘：三大股指再度大跌，特斯拉挫逾7%...美股收盘：三大股指再度大跌，特斯拉挫逾7%...三大股指再度大跌，特斯拉挫逾7%...",
-      url: "https://www.google.com",
-      publish_time: "2024-05-01 10:00",
-    },
-  ]);
+  const [tableData, setTableData] = useState([]);
   const [total, setTotal] = useState(0);
   const [twitterScopeData, setTwitterScopeData] = useState([]);
   const [twitterScopeTotal, setTwitterScopeTotal] = useState(0);
@@ -41,24 +32,22 @@ export default function TablePanel({ selectedSecond = '1' }) {
       value: 'PANEWS1',
       label: 'PANEWS1'
     },
-    {
-      value: 'PANEWS2',
-      label: 'PANEWS2'
-    },
+    
   ]);
   const map = {
     1: "flashChannels",
     2: "announcementChannels",
-    3: "nickName"
+    3: "nickName",
+    4: "newChannels"
   }
   // 根据selectedSecond动态切换表格列
   let columns, selectLabel;
-  if (selectedSecond === '1') {
+  if (['1', '4'].includes(selectedSecond)) {
     // 快讯
     columns = [
       { title: '媒体', dataIndex: 'channel_name', key: 'channel_name', width: 100 },
       { title: '标题', dataIndex: 'title', key: 'title', width: 220 },
-      { title: '快讯内容', dataIndex: 'content', key: 'content', width: 300, 
+      { title: selectedSecond === '1' ? '快讯内容' : '新闻内容', dataIndex: 'content', key: 'content', width: 300, 
         render: (text) => <div className={styles.content}>{text && text.length > 100 ? text.slice(0, 100) + '...' : text}</div>
       },
       {
@@ -112,7 +101,7 @@ export default function TablePanel({ selectedSecond = '1' }) {
   const scopePageSize = 5;
   // antd Table 自带分页
   const scopeColumns = [
-    { title: '类型', dataIndex: 'type', key: 'type', width: 120, render: (text) => text === 1 ? 'twitter_id' : '关键词'  },
+    { title: '类型', dataIndex: 'type', key: 'type', width: 120, render: (text) => text === '1' ? 'twitter_id' : '关键词'  },
     { title: '内容', dataIndex: 'value', key: 'value', width: 240 },
   ];
 
@@ -121,7 +110,9 @@ export default function TablePanel({ selectedSecond = '1' }) {
     formData.append('type', selectedSecond);
     formData.append('page', page);
     formData.append('limit', pageSize);
-    formData.append('channel_name', reset ? '' : selectValue.join(','));
+    if(!selectValue.includes('0')) {
+      formData.append('channel_name', reset ? '' : selectValue.join(','));
+    }
     formData.append('start_time', reset ? '' : dateRange ? dateRange[0].format('YYYY-MM-DD HH:mm:ss') : '');
     formData.append('end_time', reset ? '' : dateRange ? dateRange[1].format('YYYY-MM-DD HH:mm:ss') : ''); 
     setLoading(true);
@@ -148,12 +139,19 @@ export default function TablePanel({ selectedSecond = '1' }) {
     }, ...selectOptions]);
   }
   useEffect(() => {
-    getInfoFlow()
-  }, [selectedSecond]);
+    setSelectValue(['0']);
+    if(token) {
+      getInfoFlow()
+      fetchData(true)
+    }
+  }, [selectedSecond, token]);
 
   useEffect(() => {
-    fetchData()
-  }, [selectedSecond, page])
+    setSelectValue(['0']);
+    if(token) {
+      fetchData()
+    }
+  }, [page])
 
   useEffect(() => {
     if(dataScopeOpen) {
@@ -214,9 +212,9 @@ export default function TablePanel({ selectedSecond = '1' }) {
                 allowClear
               />
             </div>
-            <Button type="primary" className={styles.filterBtn} onClick={fetchData}>筛选</Button>
+            <Button type="primary" className={styles.filterBtn} onClick={() => fetchData()}>筛选</Button>
             <Button className={styles.filterBtn} disabled={selectValue.filter(v => v !== '').length === 0 && !dateRange} onClick={() => {
-              setSelectValue(['']);
+              setSelectValue(['0']);
               setDateRange(null);
               setPage(1);
               fetchData(true);

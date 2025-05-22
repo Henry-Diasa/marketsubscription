@@ -2,25 +2,25 @@
  * @Author: diasa diasa@gate.me
  * @Date: 2025-05-12 16:43:05
  * @LastEditors: diasa diasa@gate.me
- * @LastEditTime: 2025-05-15 17:18:09
+ * @LastEditTime: 2025-05-20 21:54:13
  * @FilePath: /marketsubscription/app/components/TwitterScopeForm.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import React, { useState, useEffect } from "react";
-import { Select, Input, message, Button,Spin } from "antd";
+import { Select, Input, message, Button,Spin, Popconfirm } from "antd";
 import { getTwitterScope, deleteTwitterScope, updateTwitterScope, addTwitterScope } from "../../lib/api";
 import styles from "../NewSubscriptionForm/NewSubscriptionForm.module.css";
 
 const typeOptions = [
-  { value: 1, label: "twitter_id" },
-  { value: 2, label: "关键词" },
+  { value: '1', label: "twitter_id" },
+  { value: '2', label: "关键词" },
 ];
 
 export default function TwitterScopeForm() {
   const [loading, setLoading] = useState(false);
   const [sourceScopes, setSourceScopes] = useState([]);
   const [scopes, setScopes] = useState([
-    { type: 1, value: "" },
+    { type: '1', value: "" },
   ]);
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -32,7 +32,7 @@ export default function TwitterScopeForm() {
   };
   const handleAddScope = () => {
     if (scopes.length < 10) {
-      setScopes((prev) => [...prev, { type: 1, value: "" }]);
+      setScopes((prev) => [...prev, { type: '1', value: "" }]);
     }else{
       messageApi.error('最多只能添加10个'); 
     }
@@ -104,9 +104,15 @@ export default function TwitterScopeForm() {
     }
   };
   const getTwitterData = async () => {
+    setLoading(true);
     const res = await getTwitterScope();
-    setScopes(res.data);
-    setSourceScopes(res.data);
+    if(res.code === 200) {
+      if(res.data.length > 0) {
+        setScopes(res.data);
+        setSourceScopes(res.data);
+      }
+    }
+    setLoading(false);
   }
   useEffect(() => {
     getTwitterData();
@@ -129,12 +135,15 @@ export default function TwitterScopeForm() {
                 className={styles.keywordInput}
                 value={item.value}
                 onChange={(e) => handleValueChange(e, idx)}
-                addonBefore={item.type === 1 ? "@" : null}
+                addonBefore={item.type === '1' ? "@" : null}
               />
               {idx === 0 ? (
                 <span className={styles.plus} onClick={handleAddScope} style={{ cursor: "pointer" }}>+</span>
               ) : (
-                <span className={styles.plus} onClick={() => handleRemoveScope(idx)} style={{ cursor: "pointer" }}>-</span>
+                <Popconfirm title="确定删除吗？" onConfirm={() => handleRemoveScope(idx)}  okText="确认"
+    cancelText="取消">
+                <span className={styles.plus} style={{ cursor: "pointer" }}>-</span>
+                </Popconfirm>
               )}
             </div>
           ))}

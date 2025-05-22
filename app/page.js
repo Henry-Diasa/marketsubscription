@@ -1,38 +1,57 @@
 'use client'
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Button, Modal, Form, Select, Input, message } from "antd";
 import styles from "./page.module.css";
 import dynamic from 'next/dynamic';
 import NewSubscriptionForm from "./components/NewSubscriptionForm/NewSubscriptionForm";
 import CurrentSubscriptionTable from "./components/CurrentSubscriptionTable/CurrentSubscriptionTable";
 import TwitterScopeForm from "./components/TwitterScopeForm/TwitterScopeForm";
-import { addDataSource } from "./lib/api";
+import LarkLoginButton from "./components/LarkLoginButton";
+import { addDataSource, getToken } from "./lib/api";
 const TablePanel = dynamic(() => import('./components/TablePanel/TablePanel'), { ssr: false });
 
 export default function Home() {
-  // 第一排和第二排按钮配置
-  const FirstRow = [
-    { key: "info", label: "信息流" },
-    { key: "my", label: "我的订阅" },
-  ];
-  // 新增来源按钮单独处理
-  let SecondRow, addBtn;
   const [selectedFirst, setSelectedFirst] = useState("info");
   const [selectedSecond, setSelectedSecond] = useState("1");
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [subId, setSubId] = useState('');
   const [messageApi, contextHolder] = message.useMessage();
+  const isAuthenticatedRef = useRef(false)
+  const [token, setToken] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('token') || ''
+    }
+    return ''
+  })
+  const [code, setCode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search).get('code') || ''
+    }
+    return ''
+  })
+  const [isAuthenticating, setIsAuthenticating] = useState(code ? true : false)
+  if (code && token) {
+    isAuthenticatedRef.current = true;
+  }
+  // 第一排和第二排按钮配置
+  const FirstRow = [
+    { key: "info", label: "信息流" },
+    { key: "my", label: "我的订阅" },
+  ];
 
+  // 新增来源按钮单独处理
+  let SecondRow, addBtn;
   if (selectedFirst === 'my') {
     SecondRow = [
-      { key: 'new', label: '新订阅' },
+      { key: 'new', label: subId ? '编辑订阅' : '新订阅' },
       { key: 'current', label: '当前订阅' },
       { key: 'addTwitterScope', label: '新增Twitter数据范围' },
     ];
   } else {
     SecondRow = [
       { key: "1", label: "快讯" },
+      { key: "4", label: "新闻" },
       { key: "2", label: "公告" },
       { key: "3", label: "twitter" },
     ];
@@ -43,10 +62,37 @@ export default function Home() {
   useEffect(() => {
     if (selectedFirst === 'my') {
       setSelectedSecond('new');
-    }else{
+    } else {
       setSelectedSecond('1');
     }
   }, [selectedFirst]);
+
+  useEffect(() => {
+    if (code) {
+      const token = localStorage.getItem('token')
+      setToken(token)
+      
+      if(!token) {
+        const formData = new FormData();
+        formData.append('code', code);
+        getToken(formData).then((res) => {
+          if (res?.data?.token) {
+            localStorage.setItem('token', res.data.token);
+            setToken(res.data.token)
+            isAuthenticatedRef.current = true;
+          }
+        }).catch(() => {
+          isAuthenticatedRef.current = false;
+          setIsAuthenticating(false);
+        })
+      } else {
+        setIsAuthenticating(false);
+      }
+    } else if(!code) {
+      localStorage.removeItem('token')
+    }
+  }, [code]);
+
   const handleSubmitDataSource = async (values) => {
     const formData = new FormData();
     formData.append('type', values.type);
@@ -61,10 +107,15 @@ export default function Home() {
     }
     setModalLoading(false);
   }
-  const handleEdit = (record) => {
+
+  const handleEdit = useCallback((record) => {
     setSubId(record.subId)
     setSelectedSecond('new')
+  }, [])
+  if (!isAuthenticatedRef.current && !isAuthenticating) {
+    return <LarkLoginButton />;
   }
+ 
   return (
     <>
       {contextHolder}
@@ -79,7 +130,10 @@ export default function Home() {
                     ? `${styles.customBtn} ${styles.selected}`
                     : styles.customBtn
                 }
-                onClick={() => setSelectedFirst(btn.key)}
+                onClick={() => {
+                  setSelectedFirst(btn.key)
+                  setSubId('')
+                }}
               >
                 {btn.label}
               </Button>
@@ -95,7 +149,12 @@ export default function Home() {
                       ? `${styles.smallBtn} ${styles.selected}`
                       : styles.smallBtn 
                   }
-                  onClick={() => setSelectedSecond(btn.key)}
+                  onClick={() => {
+                    setSelectedSecond(btn.key)
+                    if(btn.key === 'current') {
+                      setSubId('')
+                    }
+                  }}
                 >
                   {btn.label}
                 </Button>
@@ -107,8 +166,8 @@ export default function Home() {
                   key={addBtn.key}
                   className={styles.smallBtn}
                   onClick={() => setModalOpen(true)}
-              >
-                {addBtn.label}
+                >
+                  {addBtn.label}
                 </Button>
               </div>
             )}
@@ -121,7 +180,7 @@ export default function Home() {
         ) : selectedFirst === 'my' && selectedSecond === 'addTwitterScope' ? (
           <TwitterScopeForm />
         ) : (
-          <TablePanel selectedSecond={selectedSecond} />
+          <TablePanel selectedSecond={selectedSecond} token={token}/>
         )}
         {selectedFirst === 'info' &&  <div className={styles.bottomTip}>
           当前的数据获取是固定的范围，如果需要更多媒体/交易所/Twitter作者，请
@@ -151,6 +210,7 @@ export default function Home() {
             >
               <Select placeholder="请选择" options={[
                 { value: '1', label: '快讯' },
+                { value: '5', label: '新闻' },
                 { value: '2', label: '公告' },
                 { value: '3', label: 'Twitter' },
                 { value: '4', label: '其他' },
