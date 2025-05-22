@@ -185,7 +185,7 @@ export default function Home() {
         {selectedFirst === 'info' &&  <div className={styles.bottomTip}>
           当前的数据获取是固定的范围，如果需要更多媒体/交易所/Twitter作者，请
           <a
-            href="https://example.com/form" // TODO: 替换为实际表单链接
+            onClick={() => setModalOpen(true)}
             className={styles.tipLink}
             target="_blank"
             rel="noopener noreferrer"

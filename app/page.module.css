@@ -260,6 +260,7 @@ a.secondary {
   color: #356ae6;
   text-decoration: underline;
   margin-left: 4px;
+  cursor: pointer;
 }
 
 .addSourceModal .ant-modal-content {
