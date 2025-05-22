@@ -2,7 +2,7 @@
  * @Author: diasa diasa@gate.me
  * @Date: 2025-05-08 15:45:07
  * @LastEditors: diasa diasa@gate.me
- * @LastEditTime: 2025-05-21 10:24:04
+ * @LastEditTime: 2025-05-22 18:06:59
  * @FilePath: /marketsubscription/app/components/NewSubscriptionForm.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -262,7 +262,7 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId }) {
               <Form.Item label="推送群webhook链接" name="webhook" className={styles.webhookItem}>
                 <Input.TextArea rows={2} className={styles.webhookInput}/>
               </Form.Item>
-              <a className={styles.botTip} href="https://open.larksuite.com/document/client-docs/bot-v3/add-custom-bot">如何获取bot链接？</a>
+              <a className={styles.botTip} target="_blank" rel="noopener noreferrer" href="https://open.larksuite.com/document/client-docs/bot-v3/add-custom-bot">如何获取bot链接？</a>
             </div>
             <div className={styles.formBtns}>
               <Button type="primary" htmlType="submit" className={styles.submitBtn}>确定</Button>
