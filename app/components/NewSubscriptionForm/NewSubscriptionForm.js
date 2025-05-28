@@ -2,7 +2,7 @@
  * @Author: diasa diasa@gate.me
  * @Date: 2025-05-08 15:45:07
  * @LastEditors: diasa diasa@gate.me
- * @LastEditTime: 2025-05-22 18:06:59
+ * @LastEditTime: 2025-05-28 15:18:45
  * @FilePath: /marketsubscription/app/components/NewSubscriptionForm.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -43,7 +43,7 @@ const keywordTypeOptionsMap = {
   ],
 };
 
-export default function NewSubscriptionForm({ handleAddSuccess, subId }) {
+export default function NewSubscriptionForm({ handleAddSuccess, subId,tablePanelRef }) {
   const typeOptions = [
     { value: 1, label: '快讯' },
     { value: 2, label: '公告' },
@@ -210,7 +210,7 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId }) {
   return (
     <>
       {contextHolder}
-      <div className={styles.formWrapper}>
+      <div className={`${styles.formWrapper}`}>
         <Spin spinning={loading}>
           <Form form={form} layout="horizontal" initialValues={{ type, webhook }} onFinish={handleFinish}>
             <Form.Item label="类型" name="type">
@@ -229,6 +229,7 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId }) {
                 {keywords.map((item, idx) => (
                   <div className={styles.keywordsRow} key={idx}>
                     <Select
+                      maxTagCount='responsive'
                       mode="multiple"
                       allowClear
                       options={keywordTypeOptions}
@@ -259,10 +260,16 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId }) {
               </Form.Item>
             </div>
             <div className={styles.webhookRow}>
-              <Form.Item label="推送群webhook链接" name="webhook" className={styles.webhookItem}>
+              <Form.Item label="推送群webhook链接" name="webhook" className={styles.webhookItem} rules={[{ required: true, message: '请输入webhook链接' }]}>
                 <Input.TextArea rows={2} className={styles.webhookInput}/>
               </Form.Item>
-              <a className={styles.botTip} target="_blank" rel="noopener noreferrer" href="https://open.larksuite.com/document/client-docs/bot-v3/add-custom-bot">如何获取bot链接？</a>
+              <div className={styles.botTip}>
+                <a className={styles.botTipA} target="_blank" rel="noopener noreferrer" href="https://open.larksuite.com/document/client-docs/bot-v3/add-custom-bot">如何获取bot链接？</a>
+              </div>
+
+              {type === 3 && <div className={styles.botTip}>
+                目前的Twitter数据获取是固定的范围，如果需要更多数据，请<a className={styles.botTipA} target="_blank" rel="noopener noreferrer" onClick={() => tablePanelRef.current.handleAddDataScope()}>添加数据范围 </a>
+              </div>}
             </div>
             <div className={styles.formBtns}>
               <Button type="primary" htmlType="submit" className={styles.submitBtn}>确定</Button>

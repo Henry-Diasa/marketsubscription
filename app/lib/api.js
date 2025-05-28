@@ -200,3 +200,12 @@ export const getToken = async (data) => {
     throw error;
   }
 }
+
+export const checkTwitterScope = async (data) => {
+  try {
+    const response = await api.post('/infoSub/twitterVerify', data);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}

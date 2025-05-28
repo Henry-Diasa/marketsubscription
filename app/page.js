@@ -1,36 +1,38 @@
-'use client'
+"use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Button, Modal, Form, Select, Input, message } from "antd";
+import { Button, Modal, Form, Select, Input, message, Table } from "antd";
 import styles from "./page.module.css";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 import NewSubscriptionForm from "./components/NewSubscriptionForm/NewSubscriptionForm";
 import CurrentSubscriptionTable from "./components/CurrentSubscriptionTable/CurrentSubscriptionTable";
-import TwitterScopeForm from "./components/TwitterScopeForm/TwitterScopeForm";
 import LarkLoginButton from "./components/LarkLoginButton";
 import { addDataSource, getToken } from "./lib/api";
-const TablePanel = dynamic(() => import('./components/TablePanel/TablePanel'), { ssr: false });
+const TablePanel = dynamic(() => import("./components/TablePanel/TablePanel"), {
+  ssr: false,
+});
 
 export default function Home() {
   const [selectedFirst, setSelectedFirst] = useState("info");
   const [selectedSecond, setSelectedSecond] = useState("1");
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
-  const [subId, setSubId] = useState('');
+  const [subId, setSubId] = useState("");
+  const tablePanelRef = useRef(null);
   const [messageApi, contextHolder] = message.useMessage();
-  const isAuthenticatedRef = useRef(false)
+  const isAuthenticatedRef = useRef(false);
   const [token, setToken] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('token') || ''
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("token") || "";
     }
-    return ''
-  })
+    return "";
+  });
   const [code, setCode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return new URLSearchParams(window.location.search).get('code') || ''
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("code") || "";
     }
-    return ''
-  })
-  const [isAuthenticating, setIsAuthenticating] = useState(code ? true : false)
+    return "";
+  });
+  const [isAuthenticating, setIsAuthenticating] = useState(code ? true : false);
   if (code && token) {
     isAuthenticatedRef.current = true;
   }
@@ -42,11 +44,10 @@ export default function Home() {
 
   // 新增来源按钮单独处理
   let SecondRow, addBtn;
-  if (selectedFirst === 'my') {
+  if (selectedFirst === "my") {
     SecondRow = [
-      { key: 'new', label: subId ? '编辑订阅' : '新订阅' },
-      { key: 'current', label: '当前订阅' },
-      { key: 'addTwitterScope', label: '新增Twitter数据范围' },
+      { key: "new", label: subId ? "编辑订阅" : "新订阅" },
+      { key: "current", label: "当前订阅" },
     ];
   } else {
     SecondRow = [
@@ -55,74 +56,76 @@ export default function Home() {
       { key: "2", label: "公告" },
       { key: "3", label: "twitter" },
     ];
-    addBtn = { key: "add", label: "新增来源 +" };
+    addBtn = { key: "add", label: "申请新增来源 +" };
   }
 
   // 切换我的订阅时，selectedSecond默认选中新订阅
   useEffect(() => {
-    if (selectedFirst === 'my') {
-      setSelectedSecond('new');
+    if (selectedFirst === "my") {
+      setSelectedSecond("new");
     } else {
-      setSelectedSecond('1');
+      setSelectedSecond("1");
     }
   }, [selectedFirst]);
 
   useEffect(() => {
     if (code) {
-      const token = localStorage.getItem('token')
-      setToken(token)
-      
-      if(!token) {
+      const token = localStorage.getItem("token");
+      setToken(token);
+
+      if (!token) {
         const formData = new FormData();
-        formData.append('code', code);
-        getToken(formData).then((res) => {
-          if (res?.data?.token) {
-            localStorage.setItem('token', res.data.token);
-            setToken(res.data.token)
-            isAuthenticatedRef.current = true;
-          }
-        }).catch(() => {
-          isAuthenticatedRef.current = false;
-          setIsAuthenticating(false);
-        })
+        formData.append("code", code);
+        getToken(formData)
+          .then((res) => {
+            if (res?.data?.token) {
+              localStorage.setItem("token", res.data.token);
+              setToken(res.data.token);
+              isAuthenticatedRef.current = true;
+            }
+          })
+          .catch(() => {
+            isAuthenticatedRef.current = false;
+            setIsAuthenticating(false);
+          });
       } else {
         setIsAuthenticating(false);
       }
-    } else if(!code) {
-      localStorage.removeItem('token')
+    } else if (!code) {
+      localStorage.removeItem("token");
     }
   }, [code]);
 
   const handleSubmitDataSource = async (values) => {
     const formData = new FormData();
-    formData.append('type', values.type);
-    formData.append('apply_content', values.apply_content);
+    formData.append("type", values.type);
+    formData.append("apply_content", values.apply_content);
     setModalLoading(true);
     const response = await addDataSource(formData);
     if (response.code === 200) {
-      messageApi.success('提交成功');
+      messageApi.success("提交成功");
       setModalOpen(false);
     } else {
-      messageApi.error('提交失败');
+      messageApi.error("提交失败");
     }
     setModalLoading(false);
-  }
+  };
 
   const handleEdit = useCallback((record) => {
-    setSubId(record.subId)
-    setSelectedSecond('new')
-  }, [])
+    setSubId(record.subId);
+    setSelectedSecond("new");
+  }, []);
   if (!isAuthenticatedRef.current && !isAuthenticating) {
     return <LarkLoginButton />;
   }
- 
+
   return (
     <>
       {contextHolder}
       <div className={styles.pagePadding}>
         <div className={styles.buttonPanel}>
           <div className={styles.buttonRow}>
-            {FirstRow.map(btn => (
+            {FirstRow.map((btn) => (
               <Button
                 key={btn.key}
                 className={
@@ -131,8 +134,8 @@ export default function Home() {
                     : styles.customBtn
                 }
                 onClick={() => {
-                  setSelectedFirst(btn.key)
-                  setSubId('')
+                  setSelectedFirst(btn.key);
+                  setSubId("");
                 }}
               >
                 {btn.label}
@@ -141,18 +144,18 @@ export default function Home() {
           </div>
           <div className={styles.buttonRowSmallWithAdd}>
             <div className={styles.buttonRowSmallLeft}>
-              {SecondRow.map(btn => (
+              {SecondRow.map((btn) => (
                 <Button
                   key={btn.key}
                   className={
                     selectedSecond === btn.key
                       ? `${styles.smallBtn} ${styles.selected}`
-                      : styles.smallBtn 
+                      : styles.smallBtn
                   }
                   onClick={() => {
-                    setSelectedSecond(btn.key)
-                    if(btn.key === 'current') {
-                      setSubId('')
+                    setSelectedSecond(btn.key);
+                    if (btn.key === "current") {
+                      setSubId("");
                     }
                   }}
                 >
@@ -160,7 +163,7 @@ export default function Home() {
                 </Button>
               ))}
             </div>
-            {selectedFirst === 'info' && (
+            {selectedFirst === "info" && (
               <div className={styles.buttonRowSmallAdd}>
                 <Button
                   key={addBtn.key}
@@ -173,26 +176,50 @@ export default function Home() {
             )}
           </div>
         </div>
-        {selectedFirst === 'my' && selectedSecond === 'new' ? (
-          <NewSubscriptionForm subId={subId} handleAddSuccess={() => setSelectedSecond('current')}/>
-        ) : selectedFirst === 'my' && selectedSecond === 'current' ? (
-          <CurrentSubscriptionTable handleEdit={handleEdit}/>
-        ) : selectedFirst === 'my' && selectedSecond === 'addTwitterScope' ? (
-          <TwitterScopeForm />
-        ) : (
-          <TablePanel selectedSecond={selectedSecond} token={token}/>
+        <div style={{ display: selectedFirst === "my" ? "none" : "block" }}>
+          <TablePanel
+            ref={tablePanelRef}
+            selectedSecond={selectedSecond}
+            token={token}
+          />
+        </div>
+        {selectedFirst === "my" && selectedSecond === "new" && (
+          <NewSubscriptionForm
+            tablePanelRef={tablePanelRef}
+            subId={subId}
+            handleAddSuccess={() => setSelectedSecond("current")}
+          />
         )}
-        {selectedFirst === 'info' &&  <div className={styles.bottomTip}>
-          当前的数据获取是固定的范围，如果需要更多媒体/交易所/Twitter作者，请
+        {selectedFirst === "my" && selectedSecond === "current" && (
+          <CurrentSubscriptionTable handleEdit={handleEdit} />
+        )}
+
+        {selectedFirst === "info" && selectedSecond !== "3" && (
+          <div className={styles.bottomTip}>
+            目前的数据获取是固定的范围，如果需要更多媒体/交易所，请
+            <a
+              onClick={() => setModalOpen(true)}
+              className={styles.tipLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              填写表单
+            </a>
+          </div>
+        )}
+        {selectedSecond === "3" && <div className={styles.bottomTip}>
+          目前的Twitter数据获取是固定的范围，如果需要更多数据，请
           <a
-            onClick={() => setModalOpen(true)}
+            onClick={() => {
+              tablePanelRef.current.handleAddDataScope();
+            }}
             className={styles.tipLink}
             target="_blank"
             rel="noopener noreferrer"
           >
-            填写表单
+            添加数据范围
           </a>
-        </div> }
+        </div>}
         {/* 新增来源 弹框 */}
         <Modal
           open={modalOpen}
@@ -206,26 +233,40 @@ export default function Home() {
             <Form.Item
               label={<span>类型</span>}
               name="type"
-              rules={[{ required: true, message: '请选择类型' }]}
+              rules={[{ required: true, message: "请选择类型" }]}
             >
-              <Select placeholder="请选择" options={[
-                { value: '1', label: '快讯' },
-                { value: '5', label: '新闻' },
-                { value: '2', label: '公告' },
-                { value: '3', label: 'Twitter' },
-                { value: '4', label: '其他' },
-              ]} />
+              <Select
+                placeholder="请选择"
+                options={[
+                  { value: "1", label: "快讯" },
+                  { value: "3", label: "新闻" },
+                  { value: "2", label: "公告" },
+                  { value: "4", label: "其他" },
+                ]}
+              />
             </Form.Item>
             <Form.Item
               label="申请内容"
               name="apply_content"
-              rules={[{ required: true, message: '请填写申请内容' }]}
+              rules={[{ required: true, message: "请填写申请内容" }]}
             >
               <Input.TextArea rows={4} placeholder="其他原因补充" />
             </Form.Item>
             <div className={styles.addSourceBtns}>
-              <Button type="primary" htmlType="submit" loading={modalLoading} className={styles.addSourceSubmit}>提交</Button>
-              <Button onClick={() => setModalOpen(false)} className={styles.addSourceCancel}>取消</Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={modalLoading}
+                className={styles.addSourceSubmit}
+              >
+                提交
+              </Button>
+              <Button
+                onClick={() => setModalOpen(false)}
+                className={styles.addSourceCancel}
+              >
+                取消
+              </Button>
             </div>
           </Form>
         </Modal>

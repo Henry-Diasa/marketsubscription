@@ -1,11 +1,13 @@
 'use client'
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Select, Button, DatePicker, Table, Modal } from "antd";
 import { ReloadOutlined } from '@ant-design/icons';
 import { getInfoFlowConfig, getInfoFlowList, getTwitterDataAll } from '../../lib/api';
+import TwitterScopeForm from "../TwitterScopeForm/TwitterScopeForm";
 import styles from "./TablePanel.module.css";
 
-export default function TablePanel({ selectedSecond = '1', token }) {
+
+const TablePanel = forwardRef(({ selectedSecond = '1', token }, ref) => {
   const [selectValue, setSelectValue] = useState(['0']);
   const [dateRange, setDateRange] = useState(null);
   const pageSize = 20;
@@ -13,6 +15,7 @@ export default function TablePanel({ selectedSecond = '1', token }) {
   const [scopePage, setScopePage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
   const [dataScopeOpen, setDataScopeOpen] = useState(false);
+  const [dataScopeView, setDataScopeView] = useState('view');
   const [loading, setLoading] = useState(false);
   const [twitterScopeLoading, setTwitterScopeLoading] = useState(false);
   const [tableData, setTableData] = useState([]);
@@ -170,9 +173,9 @@ export default function TablePanel({ selectedSecond = '1', token }) {
       setDateRange(null);
     }
   };
-  const handleDataScope = async () => {
+  const handleDataScope = async (reset = false) => {
     const formData = new FormData();
-    formData.append('page', scopePage);
+    formData.append('page', reset ? 1 : scopePage);
     formData.append('limit', scopePageSize);
     setDataScopeOpen(true);
     setTwitterScopeLoading(true);
@@ -181,6 +184,15 @@ export default function TablePanel({ selectedSecond = '1', token }) {
     setTwitterScopeTotal(response.data.total);
     setTwitterScopeLoading(false);
   }
+  const handleAddDataScope = () => {
+    setDataScopeOpen(true);
+    setDataScopeView('add');
+  }
+
+  useImperativeHandle(ref, () => ({
+    handleAddDataScope
+  }));
+
   return (
     <div className={styles.tableWrapper}>
       {/* 筛选区 */}
@@ -192,6 +204,7 @@ export default function TablePanel({ selectedSecond = '1', token }) {
               value={selectValue}
               options={selectOptions}
               className={styles.select}
+              maxTagCount='responsive'
               onChange={(value) => {
                 if (value[value.length - 1] === '0') {
                   setSelectValue(['0']);
@@ -220,7 +233,7 @@ export default function TablePanel({ selectedSecond = '1', token }) {
               fetchData(true);
             }}>重置</Button>
             {selectedSecond === '3' && (
-              <Button className={styles.filterBtn} type="default" onClick={handleDataScope}>查看数据范围</Button>
+              <Button className={styles.filterBtn} type="default" onClick={handleDataScope}>查看/添加数据范围</Button>
             )}
           </div>
         </div>
@@ -246,35 +259,74 @@ export default function TablePanel({ selectedSecond = '1', token }) {
         className={styles.antdTable}
         loading={loading}
       />
+
       <Modal
         open={dataScopeOpen}
         onCancel={() => {
           setDataScopeOpen(false);
           setScopePage(1);
+          setDataScopeView('view');
         }}
         footer={null}
         centered
         className={styles.dataScopeModal}
         title={<div className={styles.dataScopeTitle}>Twitter数据范围</div>}
       >
-        <Table
-          loading={twitterScopeLoading}
-          columns={scopeColumns}
-          dataSource={twitterScopeData}
-          pagination={{
-            current: scopePage,
-            pageSize: scopePageSize,
-            total: twitterScopeTotal,
-            onChange: setScopePage,
-            showSizeChanger: false,
-            size: 'small',
-          }}
-          rowKey="key"
-          size="middle"
-          bordered
-          className={styles.scopeAntdTable}
-        />
+        <div className={styles.dataScopeButtons}>
+          <Button 
+            type={dataScopeView === 'view' ? 'primary' : 'default'} 
+            onClick={() => {
+              setDataScopeView('view');
+              setScopePage(1);
+              handleDataScope(true)
+            }}
+            className={styles.dataScopeButton}
+          >
+            查看数据范围
+          </Button>
+          <Button 
+            type={dataScopeView === 'add' ? 'primary' : 'default'} 
+            onClick={() => setDataScopeView('add')}
+            className={styles.dataScopeButton}
+          >
+            添加数据范围
+          </Button>
+        </div>
+        
+        {dataScopeView === 'view' && (
+          <Table
+            loading={twitterScopeLoading}
+            columns={scopeColumns}
+            dataSource={twitterScopeData}
+            pagination={{
+              current: scopePage,
+              pageSize: scopePageSize,
+              total: twitterScopeTotal,
+              onChange: setScopePage,
+              showSizeChanger: false,
+              size: 'small',
+            }}
+            rowKey="key"
+            size="middle"
+            bordered
+            className={styles.scopeAntdTable}
+          />
+        )}
+        
+        {dataScopeView === 'add' && (
+          <div className={styles.addDataScope}>
+            <TwitterScopeForm handleCancel={() => {
+              setDataScopeView('view');
+              setScopePage(1);
+              handleDataScope(true)
+            }}/>
+          </div>
+        )}
       </Modal>
     </div>
   );
-} 
+});
+
+TablePanel.displayName = 'TablePanel';
+
+export default TablePanel; 
