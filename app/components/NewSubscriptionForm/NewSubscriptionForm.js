@@ -2,7 +2,7 @@
  * @Author: diasa diasa@gate.me
  * @Date: 2025-05-08 15:45:07
  * @LastEditors: diasa diasa@gate.me
- * @LastEditTime: 2025-05-29 13:24:11
+ * @LastEditTime: 2025-05-29 15:00:48
  * @FilePath: /marketsubscription/app/components/NewSubscriptionForm.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -83,7 +83,7 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId,tablePanel
     setWebhook(webhook)
     setKeywords(keywordList)
     setSourceKeywords(keywordList)
-
+    form.setFieldsValue({ type: Number(type) })
     form.setFieldsValue({ webhook });
     form.setFieldsValue({ keywords: keywordList });
   }
@@ -109,7 +109,7 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId,tablePanel
   const handleRemoveKeyword = async (idx) => {
     const formValues = form.getFieldsValue();
     const id = formValues.keywords[idx].id;  
-    debugger
+    
     if(id) {
       const formData = new FormData();
       formData.append('subId', subId);
@@ -137,7 +137,6 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId,tablePanel
         keyword: item.value
       }))
     };
-      console.log(data, 88)
     setLoading(true);
     // 处理关键词的新增和编辑
     const newKeywords = keywords.filter(item => !item.id).map(item => ({
@@ -272,7 +271,6 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId,tablePanel
                         ) : (
                           <Popconfirm title="确定删除吗？" onConfirm={() => {
                             const formValues = form.getFieldsValue();
-                            debugger
                             const id = formValues.keywords[index].id;  // 从表单值中获取 id
                             
                             if(id) {

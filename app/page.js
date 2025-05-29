@@ -54,7 +54,7 @@ export default function Home() {
       { key: "1", label: "快讯" },
       { key: "4", label: "新闻" },
       { key: "2", label: "公告" },
-      { key: "3", label: "twitter" },
+      { key: "3", label: "Twitter" },
     ];
     addBtn = { key: "add", label: "申请新增来源 +" };
   }
