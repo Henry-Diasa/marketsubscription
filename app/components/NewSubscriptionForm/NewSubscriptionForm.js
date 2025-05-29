@@ -2,7 +2,7 @@
  * @Author: diasa diasa@gate.me
  * @Date: 2025-05-08 15:45:07
  * @LastEditors: diasa diasa@gate.me
- * @LastEditTime: 2025-05-28 15:18:45
+ * @LastEditTime: 2025-05-29 11:32:17
  * @FilePath: /marketsubscription/app/components/NewSubscriptionForm.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -56,7 +56,7 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId,tablePanel
   const keywordTypeOptions = keywordTypeOptionsMap[Number(type)];
   const [sourceKeywords, setSourceKeywords] = useState([]);
   const [keywords, setKeywords] = useState([
-    { types: [], value: '' },
+    { types: [], value: '', id: '' },
   ]);
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
@@ -85,6 +85,7 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId,tablePanel
     setSourceKeywords(keywordList)
 
     form.setFieldsValue({ webhook });
+    form.setFieldsValue({ keywords: keywordList });
   }
   const handleKeywordTypeChange = (types, idx) => {
     if(types[types.length - 1] === 0) {
@@ -105,7 +106,9 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId,tablePanel
     }
   };
   const handleRemoveKeyword = async (idx) => {
-    const id = keywords[idx].id
+    const formValues = form.getFieldsValue();
+    const id = formValues.keywords[idx].id;  
+    debugger
     if(id) {
       const formData = new FormData();
       formData.append('subId', subId);
@@ -114,17 +117,17 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId,tablePanel
       const response = await deleteSubKeyword(formData)
       if(response.code === 200) {
         messageApi.success('删除成功');
-        setKeywords(prev => prev.filter((_, i) => i !== idx))
+        form.setFieldsValue({ keywords: form.getFieldsValue().keywords.filter((_, i) => i !== idx) })
       } else {
         messageApi.error('删除失败');
       }
       setLoading(false)
     }else{
-      setKeywords(prev => prev.filter((_, i) => i !== idx))
+      form.setFieldsValue({ keywords: form.getFieldsValue().keywords.filter((_, i) => i !== idx) })
     } 
   };
 
-  const handleFinish = async ({type, webhook}) => {
+  const handleFinish = async ({type, webhook, keywords}) => {
     let data = {
       subType: type,
       webHookUrl: webhook,  
@@ -133,6 +136,7 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId,tablePanel
         keyword: item.value
       }))
     };
+      console.log(data, 88)
     setLoading(true);
     // 处理关键词的新增和编辑
     const newKeywords = keywords.filter(item => !item.id).map(item => ({
@@ -212,7 +216,7 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId,tablePanel
       {contextHolder}
       <div className={`${styles.formWrapper}`}>
         <Spin spinning={loading}>
-          <Form form={form} layout="horizontal" initialValues={{ type, webhook }} onFinish={handleFinish}>
+          <Form form={form} layout="horizontal" initialValues={{ type, webhook, keywords  }} onFinish={handleFinish}>
             <Form.Item label="类型" name="type">
               <Select
                 options={typeOptions}
@@ -225,42 +229,67 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId,tablePanel
               <span>可以使用 & 符号，关联必须同时存在的关键词</span>
             </div>
             <div className={styles.keywordsBlock}>
-              <Form.Item label="订阅关键词" name="keywords">
-                {keywords.map((item, idx) => (
-                  <div className={styles.keywordsRow} key={idx}>
-                    <Select
-                      maxTagCount='responsive'
-                      mode="multiple"
-                      allowClear
-                      options={keywordTypeOptions}
-                      value={item.types}
-                      className={styles.keywordTypeSelect}
-                      onChange={types => handleKeywordTypeChange(types, idx)}
-                      placeholder="请选择类型"
-                    />
-                    <Input
-                      className={styles.keywordInput}
-                      placeholder="请输入关键词"
-                      value={item.value}
-                      onChange={e => handleKeywordValueChange(e, idx)}
-                      addonBefore={item.types.includes('username') ? '@' : null}
-                    />
-                    {idx === 0 ? (
-                      <>
-                        <span className={styles.plus} onClick={handleAddKeyword} style={{ cursor: 'pointer' }}>+</span>
-                      </>
-                    ) : (
-                      <Popconfirm title="确定删除吗？" onConfirm={() => handleRemoveKeyword(idx)}  okText="确认"
-    cancelText="取消">
-                      <span className={styles.plus} style={{ cursor: 'pointer' }}>-</span>
-                      </Popconfirm>
-                    )}
-                  </div>
-                ))}
-              </Form.Item>
+              <Form.List
+                name="keywords"
+                initialValue={[{ types: [], value: '', id:'' }]}
+              >
+                {(fields, { add, remove }) => (
+                  <>
+                    {fields.map(({ key, name, ...restField }, index) => (
+                      <div className={styles.keywordsRow} key={key}>
+                        <Form.Item
+                          label={index === 0 ? "订阅关键词" : ''}
+                          {...restField}
+                          name={[name, 'types']}
+                          rules={[{ required: true, message: '请选择类型' }]}
+                        >
+                          <Select
+                            maxTagCount='responsive'
+                            mode="multiple"
+                            allowClear
+                            options={keywordTypeOptions}
+                            className={styles.keywordTypeSelect}
+                            onChange={types => handleKeywordTypeChange(types, index)}
+                            placeholder="请选择类型"
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'value']}
+                          rules={[{ required: true, message: '请输入关键词' }]}
+                        >
+                          <Input
+                            className={styles.keywordInput}
+                            placeholder="请输入关键词"
+                            onChange={e => handleKeywordValueChange(e, index)}
+                            addonBefore={keywords[index]?.types?.includes('username') ? '@' : null}
+                          />
+                        </Form.Item>
+                        {index === 0 ? (
+                          <span className={styles.plus} onClick={() => fields.length < 10 ? add({ types: [], value: '', id: '' }) : messageApi.error('最多只能添加10个关键词')} style={{ cursor: 'pointer' }}>+</span>
+                        ) : (
+                          <Popconfirm title="确定删除吗？" onConfirm={() => {
+                            const formValues = form.getFieldsValue();
+                            debugger
+                            const id = formValues.keywords[index].id;  // 从表单值中获取 id
+                            
+                            if(id) {
+                              handleRemoveKeyword(index);
+                            } else {
+                              remove(name);
+                            }
+                          }} okText="确认" cancelText="取消">
+                            <span className={styles.plus} style={{ cursor: 'pointer' }}>-</span>
+                          </Popconfirm>
+                        )}
+                      </div>
+                    ))}
+                  </>
+                )}
+              </Form.List>
             </div>
             <div className={styles.webhookRow}>
-              <Form.Item label="推送群webhook链接" name="webhook" className={styles.webhookItem} rules={[{ required: true, message: '请输入webhook链接' }]}>
+              <Form.Item label="推送群webhook链接" name="webhook" className={styles.webhookItem} rules={[{ required: true, message: '请输入webhook链接', pattern: /^https:\/\/open.larksuite.com\/open-apis\/bot.+$/, message: '请输入正确的webhook链接' }]}>
                 <Input.TextArea rows={2} className={styles.webhookInput}/>
               </Form.Item>
               <div className={styles.botTip}>

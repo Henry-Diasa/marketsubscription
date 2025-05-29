@@ -22,9 +22,12 @@
 }
 .keywordsRow {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   margin-bottom: 8px;
+  &:not(:first-child) {
+    padding-left: 100px;
+  }
 }
 .keywordTypeSelect {
   width: 250px !important;

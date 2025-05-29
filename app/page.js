@@ -22,7 +22,7 @@ export default function Home() {
   const isAuthenticatedRef = useRef(false);
   const [token, setToken] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("token") || "";
+      return localStorage.getItem("mk_token") || "";
     }
     return "";
   });
@@ -70,7 +70,7 @@ export default function Home() {
 
   useEffect(() => {
     if (code) {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("mk_token");
       setToken(token);
 
       if (!token) {
@@ -79,9 +79,12 @@ export default function Home() {
         getToken(formData)
           .then((res) => {
             if (res?.data?.token) {
-              localStorage.setItem("token", res.data.token);
+              localStorage.setItem("mk_token", res.data.token);
               setToken(res.data.token);
               isAuthenticatedRef.current = true;
+            } else if(res.code === 400) {
+              isAuthenticatedRef.current = false;
+              setIsAuthenticating(false);
             }
           })
           .catch(() => {
@@ -92,7 +95,7 @@ export default function Home() {
         setIsAuthenticating(false);
       }
     } else if (!code) {
-      localStorage.removeItem("token");
+      localStorage.removeItem("mk_token");
     }
   }, [code]);
 
@@ -179,7 +182,7 @@ export default function Home() {
         <div style={{ display: selectedFirst === "my" ? "none" : "block" }}>
           <TablePanel
             ref={tablePanelRef}
-            selectedSecond={selectedSecond}
+            selectedSecond={selectedFirst === "my" ? '' : selectedSecond}
             token={token}
           />
         </div>
@@ -187,7 +190,10 @@ export default function Home() {
           <NewSubscriptionForm
             tablePanelRef={tablePanelRef}
             subId={subId}
-            handleAddSuccess={() => setSelectedSecond("current")}
+            handleAddSuccess={() => {
+              setSelectedSecond("current")
+              setSubId("")
+            }}
           />
         )}
         {selectedFirst === "my" && selectedSecond === "current" && (

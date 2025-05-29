@@ -262,6 +262,7 @@ const TablePanel = forwardRef(({ selectedSecond = '1', token }, ref) => {
 
       <Modal
         open={dataScopeOpen}
+        className={'dataScopeModal'}
         onCancel={() => {
           setDataScopeOpen(false);
           setScopePage(1);
@@ -269,7 +270,6 @@ const TablePanel = forwardRef(({ selectedSecond = '1', token }, ref) => {
         }}
         footer={null}
         centered
-        className={styles.dataScopeModal}
         title={<div className={styles.dataScopeTitle}>Twitter数据范围</div>}
       >
         <div className={styles.dataScopeButtons}>
