@@ -2,7 +2,7 @@
  * @Author: diasa diasa@gate.me
  * @Date: 2025-05-08 15:45:07
  * @LastEditors: diasa diasa@gate.me
- * @LastEditTime: 2025-05-29 11:32:17
+ * @LastEditTime: 2025-05-29 13:24:11
  * @FilePath: /marketsubscription/app/components/NewSubscriptionForm.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -93,7 +93,8 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId,tablePanel
     }else{
       types = types.filter(item => item !== 0)
     }
-    setKeywords(prev => prev.map((item, i) => i === idx ? { ...item, types } : item));
+    form.setFieldsValue({ keywords: form.getFieldsValue().keywords.map((item, i) => i === idx ? { ...item, types } : item) });
+    // setKeywords(prev => prev.map((item, i) => i === idx ? { ...item, types } : item));
   };
   const handleKeywordValueChange = (e, idx) => {
     setKeywords(prev => prev.map((item, i) => i === idx ? { ...item, value: e.target.value } : item));
@@ -219,6 +220,7 @@ export default function NewSubscriptionForm({ handleAddSuccess, subId,tablePanel
           <Form form={form} layout="horizontal" initialValues={{ type, webhook, keywords  }} onFinish={handleFinish}>
             <Form.Item label="类型" name="type">
               <Select
+                disabled={subId}
                 options={typeOptions}
                 value={type}
                 className={styles.typeSelect}

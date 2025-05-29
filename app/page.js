@@ -82,7 +82,7 @@ export default function Home() {
               localStorage.setItem("mk_token", res.data.token);
               setToken(res.data.token);
               isAuthenticatedRef.current = true;
-            } else if(res.code === 400) {
+            } else if (res.code === 400) {
               isAuthenticatedRef.current = false;
               setIsAuthenticating(false);
             }
@@ -182,7 +182,7 @@ export default function Home() {
         <div style={{ display: selectedFirst === "my" ? "none" : "block" }}>
           <TablePanel
             ref={tablePanelRef}
-            selectedSecond={selectedFirst === "my" ? '' : selectedSecond}
+            selectedSecond={selectedFirst === "my" ? "" : selectedSecond}
             token={token}
           />
         </div>
@@ -191,8 +191,8 @@ export default function Home() {
             tablePanelRef={tablePanelRef}
             subId={subId}
             handleAddSuccess={() => {
-              setSelectedSecond("current")
-              setSubId("")
+              setSelectedSecond("current");
+              setSubId("");
             }}
           />
         )}
@@ -213,19 +213,21 @@ export default function Home() {
             </a>
           </div>
         )}
-        {selectedSecond === "3" && <div className={styles.bottomTip}>
-          目前的Twitter数据获取是固定的范围，如果需要更多数据，请
-          <a
-            onClick={() => {
-              tablePanelRef.current.handleAddDataScope();
-            }}
-            className={styles.tipLink}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            添加数据范围
-          </a>
-        </div>}
+        {selectedSecond === "3" && (
+          <div className={styles.bottomTip}>
+            目前的Twitter数据获取是固定的范围，如果需要更多数据，请
+            <a
+              onClick={() => {
+                tablePanelRef.current.handleAddDataScope();
+              }}
+              className={styles.tipLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              添加数据范围
+            </a>
+          </div>
+        )}
         {/* 新增来源 弹框 */}
         <Modal
           open={modalOpen}
@@ -254,7 +256,13 @@ export default function Home() {
             <Form.Item
               label="申请内容"
               name="apply_content"
-              rules={[{ required: true, message: "请填写申请内容" }]}
+              rules={[
+                { required: true, message: "请填写申请内容" },
+                {
+                  max: 300,
+                  message: "申请内容不能超过300字符",
+                },
+              ]}
             >
               <Input.TextArea rows={4} placeholder="其他原因补充" />
             </Form.Item>
