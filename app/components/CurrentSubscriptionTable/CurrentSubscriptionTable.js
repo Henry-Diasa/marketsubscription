@@ -2,23 +2,21 @@
  * @Author: diasa diasa@gate.me
  * @Date: 2025-05-08 16:32:52
  * @LastEditors: diasa diasa@gate.me
- * @LastEditTime: 2025-05-20 21:06:40
+ * @LastEditTime: 2025-05-29 16:54:56
  * @FilePath: /marketsubscription/app/components/CurrentSubscriptionTable/CurrentSubscriptionTable.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { Table, Button, message, Popconfirm } from "antd";
 import { getSubList, deleteSub } from "../../lib/api";
 import styles from "./CurrentSubscriptionTable.module.css";
 
-
 const typeMap = {
-  1: '快讯',
-  2: '公告',
-  3: 'Twitter',
-  4: '新闻',
-}
-
+  1: "快讯",
+  2: "公告",
+  3: "Twitter",
+  4: "新闻",
+};
 
 export default function CurrentSubscriptionTable({ handleEdit }) {
   const [page, setPage] = useState(1);
@@ -26,27 +24,77 @@ export default function CurrentSubscriptionTable({ handleEdit }) {
   const [loading, setLoading] = useState(false);
   const [subList, setSubList] = useState([]);
   const [messageApi, contextHolder] = message.useMessage();
-
+  const keywordMap = {
+    0: '全部',
+    1: '标题',
+    2: '内容',
+    3: '媒体',
+    4: '交易所',
+    5: '用户名',
+    6: '链接',
+  }
   const columns = [
-    { title: '类型', dataIndex: 'subscription_type', key: 'subscription_type', width: 80, render: (text) => typeMap[text] },
-    { title: '关键词', dataIndex: 'keyword', key: 'keyword', width: 180 },
     {
-      title: '推送群',
-      dataIndex: 'webhook_url',
-      key: 'webhook_url',
-      width: 320,
-      render: (text) => <a href={text} className={styles.link} target="_blank" rel="noopener noreferrer">{text}</a>,
+      title: "类型",
+      dataIndex: "subscription_type",
+      key: "subscription_type",
+      width: 80,
+      render: (text) => typeMap[text],
     },
     {
-      title: '操作',
-      key: 'actions',
+      title: "关键词",
+      dataIndex: "keyword",
+      key: "keyword",
+      width: 180,
+      render: (_, record) => {
+        return <ul style={{marginLeft: 10}}>
+        {record.keywords.map((item, index) => (
+          <li key={index}>
+            <span style={{fontWeight: 'bold', marginRight: 10}}>{item.keyword_scope.split(',').map(item => keywordMap[item]).join('&')} : </span>
+            <span>{item.keyword}</span>
+          </li>
+        ))}
+        </ul>
+      },
+    },
+    {
+      title: "推送群",
+      dataIndex: "webhook_url",
+      key: "webhook_url",
+      width: 320,
+      render: (text) => (
+        <a
+          href={text}
+          className={styles.link}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {text}
+        </a>
+      ),
+    },
+    {
+      title: "操作",
+      key: "actions",
       width: 120,
       render: (_, record) => (
         <>
-          <Button type="link" className={styles.actionBtn} onClick={() => handleEdit(record)}>编辑</Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(record)}  okText="确认"
-    cancelText="取消">
-            <Button type="link" className={styles.actionBtn} danger>删除</Button>
+          <Button
+            type="link"
+            className={styles.actionBtn}
+            onClick={() => handleEdit(record)}
+          >
+            编辑
+          </Button>
+          <Popconfirm
+            title="确定删除吗？"
+            onConfirm={() => handleDelete(record)}
+            okText="确认"
+            cancelText="取消"
+          >
+            <Button type="link" className={styles.actionBtn} danger>
+              删除
+            </Button>
           </Popconfirm>
         </>
       ),
@@ -57,18 +105,18 @@ export default function CurrentSubscriptionTable({ handleEdit }) {
     const response = await getSubList();
     setSubList(Object.values(response.data));
     setLoading(false);
-  }
+  };
   const handleDelete = async (record) => {
     const formData = new FormData();
-    formData.append('subId', record.subId);
+    formData.append("subId", record.subId);
     const response = await deleteSub(formData);
-    if(response.code === 200) {
-      messageApi.success('删除成功');
+    if (response.code === 200) {
+      messageApi.success("删除成功");
       fetchSubList();
     } else {
-      messageApi.error('删除失败');
+      messageApi.error("删除失败");
     }
-  }
+  };
   useEffect(() => {
     fetchSubList();
   }, [page]);
@@ -79,12 +127,12 @@ export default function CurrentSubscriptionTable({ handleEdit }) {
         <Table
           loading={loading}
           columns={columns}
-          dataSource ={subList}
+          dataSource={subList}
           pagination={{
             pageSize: 20,
             current: page,
             showSizeChanger: false,
-            size: 'small',
+            size: "small",
             total,
             onChange: setPage,
           }}
@@ -94,4 +142,4 @@ export default function CurrentSubscriptionTable({ handleEdit }) {
       </div>
     </>
   );
-} 
+}

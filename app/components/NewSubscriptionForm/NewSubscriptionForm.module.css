@@ -4,17 +4,22 @@
   label {
     justify-content: flex-end;
     display: inline-block;
-    width: 100px !important;
+    width: 120px !important;
   }
 }
 .typeSelect {
   width: 500px !important;
 }
+.or {
+  padding-left: 366px;
+  position: relative;
+  top: -6px;
+}
 .keywordLabelRow {
   color: #888;
   font-size: 13px;
   margin-bottom: 8px;
-  padding-left: 100px;
+  padding-left: 120px;
 }
 .keywordsBlock {
   margin-bottom: 12px;
@@ -26,7 +31,7 @@
   gap: 8px;
   margin-bottom: 8px;
   &:not(:first-child) {
-    padding-left: 100px;
+    padding-left: 120px;
   }
 }
 .keywordTypeSelect {
@@ -61,7 +66,7 @@
 .botTip {
   font-size: 13px;
   margin-bottom: 8px;
-  padding-left: 100px;
+  padding-left: 120px;
 }
 .botTipA {
   color: #888;

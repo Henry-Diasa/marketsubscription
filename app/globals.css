@@ -5,6 +5,9 @@
 .ant-form-item-label {
   white-space: normal !important;
 }
+.ant-form-item {
+  margin-bottom: 0 !important;
+}
 .dataScopeModal .ant-modal-content {
   height: 440px !important;
 }
