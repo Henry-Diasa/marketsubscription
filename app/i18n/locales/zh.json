@@ -1,0 +1,120 @@
+{
+  "meta": {
+    "title": "信息流订阅系统",
+    "desc": "市场订阅系统"
+  },
+  "firstButton": {
+    "info": "信息流",
+    "my": "我的订阅"
+  },
+  "secondButton": {
+    "k": "快讯",
+    "news": "新闻",
+    "announcement": "公告",
+    "other": "其他",
+    "twitter": "Twitter",
+    "new": "新订阅",
+    "edit": "编辑订阅",
+    "current": "当前订阅"
+  },
+  "addButton": {
+    "add": "申请新增来源"
+  },
+  "table1": {
+    "label11": "选择媒体",
+    "label12": "选择交易所",
+    "label13": "选择作者",
+    "label2": "选择时间范围",
+    "button1": "筛选",
+    "button2": "重置",
+    "button3": "查看/添加数据范围",
+    "button4": "刷新",
+    "column1": "媒体",
+    "column2": "标题",
+    "column3": "快讯内容",
+    "column4": "原文链接",
+    "column5": "时间",
+    "column6": "新闻内容",
+    "column7": "交易所",
+    "column8": "公告内容",
+    "column9": "作者",
+    "column10": "推文内容",
+    "view": "查看",
+    "tips11": "目前的Twitter数据获取是固定的范围，如果需要更多数据，请",
+    "tips12": "添加数据范围",
+    "tips21": "目前的数据获取是固定的范围，如果需要更多媒体/交易所，请",
+    "tips22": "填写表单"
+  },
+  "modal1": {
+    "title": "新增来源申请",
+    "label1": "类型",
+    "label2": "申请内容",
+    "place1": "请选择",
+    "place2": "其他原因补充",
+    "error1": "请选择类型",
+    "error2": "请填写申请内容",
+    "error3": "申请内容不能超过300字符",
+    "button1": "提交",
+    "button2": "取消"
+  },
+  "modal2": {
+    "title": "Twitter数据范围",
+    "tab1": "查看数据范围",
+    "tab2": "添加数据范围",
+    "col1": "类型",
+    "col2": "内容",
+    "err1": "请输入twitter_id",
+    "tips": "*数据暂时无法做到实时获取，会有几分钟至几小时不等",
+    "confirmt": "确定删除吗？",
+    "confirm": "确定",
+    "cancel": "取消"
+  },
+  "new": {
+    "all": "全部",
+    "type": "类型",
+    "type1": "快讯",
+    "type2": "公告",
+    "type3": "Twitter",
+    "type4": "新闻",
+    "keyword": "订阅关键词",
+    "key1": "标题",
+    "key2": "内容",
+    "key3": "媒体",
+    "key4": "链接",
+    "key5": "交易所",
+    "key6": "用户名",
+    "place1": "请选择类型",
+    "place2": "请输入关键词",
+    "max": "最多只能添加10个关键词",
+    "tips1": "可以使用 & 符号，关联必须同时存在的关键词",
+    "hook": "webhook链接",
+    "how": "如何获取bot链接？",
+    "error1": "请输入webhook链接",
+    "error2": "请输入正确的webhook链接"
+  },
+  "current": {
+    "col1": "类型",
+    "col2": "关键词",
+    "col3": "推送群",
+    "col4": "操作",
+    "ope1": "编辑",
+    "ope2": "删除"
+  },
+  "message": {
+    "deleteSuccess": "删除成功",
+    "deleteFail": "删除失败",
+    "uptKeyFail": "更新关键词失败",
+    "addKeyFail": "新增关键词失败",
+    "handleKeyFail": "关键词处理失败",
+    "uptSuccess": "更新成功",
+    "subSuccess": "订阅成功",
+    "uptFail": "更新失败",
+    "subFail": "订阅失败",
+    "addSuccess": "新增成功",
+    "addFail": "新增失败",
+    "checkFail": "数据填写错误，请检查",
+    "twitterIdExist": "该twitter_id已包含在数据范围内",
+    "submitSuccess": "提交成功",
+    "submitFail": "提交失败"
+  }
+}

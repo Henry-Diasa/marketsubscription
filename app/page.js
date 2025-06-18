@@ -1,12 +1,14 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Button, Modal, Form, Select, Input, message, Table } from "antd";
+import { Button, Modal, Form, Select, Input, message, Radio } from "antd";
 import styles from "./page.module.css";
 import dynamic from "next/dynamic";
 import NewSubscriptionForm from "./components/NewSubscriptionForm/NewSubscriptionForm";
 import CurrentSubscriptionTable from "./components/CurrentSubscriptionTable/CurrentSubscriptionTable";
 import LarkLoginButton from "./components/LarkLoginButton";
 import { addDataSource, getToken } from "./lib/api";
+import { useLanguage } from "./context/LanguageContext";
+import { useTranslation } from "./hooks/useTranslation";
 const TablePanel = dynamic(() => import("./components/TablePanel/TablePanel"), {
   ssr: false,
 });
@@ -20,6 +22,8 @@ export default function Home() {
   const tablePanelRef = useRef(null);
   const [messageApi, contextHolder] = message.useMessage();
   const isAuthenticatedRef = useRef(false);
+  const { currentLang, setCurrentLang } = useLanguage();
+  const t = useTranslation(currentLang);
   const [token, setToken] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("mk_token") || "";
@@ -38,27 +42,32 @@ export default function Home() {
   }
   // 第一排和第二排按钮配置
   const FirstRow = [
-    { key: "info", label: "信息流" },
-    { key: "my", label: "我的订阅" },
+    { key: "info", label: t("firstButton.info") },
+    { key: "my", label: t("firstButton.my") },
   ];
 
   // 新增来源按钮单独处理
   let SecondRow, addBtn;
   if (selectedFirst === "my") {
     SecondRow = [
-      { key: "new", label: subId ? "编辑订阅" : "新订阅" },
-      { key: "current", label: "当前订阅" },
+      {
+        key: "new",
+        label: subId ? t("secondButton.edit") : t("secondButton.new"),
+      },
+      { key: "current", label: t("secondButton.current") },
     ];
   } else {
     SecondRow = [
-      { key: "1", label: "快讯" },
-      { key: "4", label: "新闻" },
-      { key: "2", label: "公告" },
-      { key: "3", label: "Twitter" },
+      { key: "1", label: t("secondButton.k") },
+      { key: "4", label: t("secondButton.news") },
+      { key: "2", label: t("secondButton.announcement") },
+      { key: "3", label: t("secondButton.twitter") },
     ];
-    addBtn = { key: "add", label: "申请新增来源 +" };
+    addBtn = { key: "add", label: t("addButton.add") };
   }
-
+  useEffect(() => {
+    document.title = t("meta.title");
+  }, [currentLang]);
   // 切换我的订阅时，selectedSecond默认选中新订阅
   useEffect(() => {
     if (selectedFirst === "my") {
@@ -106,10 +115,10 @@ export default function Home() {
     setModalLoading(true);
     const response = await addDataSource(formData);
     if (response.code === 200) {
-      messageApi.success("提交成功");
+      messageApi.success(t("message.submitSuccess"));
       setModalOpen(false);
     } else {
-      messageApi.error("提交失败");
+      messageApi.error(t("message.submitFail"));
     }
     setModalLoading(false);
   };
@@ -118,6 +127,9 @@ export default function Home() {
     setSubId(record.subId);
     setSelectedSecond("new");
   }, []);
+  const handleLanguageChange = (e) => {
+    setCurrentLang(e.target.value);
+  };
   if (!isAuthenticatedRef.current && !isAuthenticating) {
     return <LarkLoginButton />;
   }
@@ -144,6 +156,14 @@ export default function Home() {
                 {btn.label}
               </Button>
             ))}
+            <Radio.Group
+              className={styles.languageRadio}
+              value={currentLang}
+              onChange={handleLanguageChange}
+            >
+              <Radio.Button value="zh">zh</Radio.Button>
+              <Radio.Button value="en">en</Radio.Button>
+            </Radio.Group>
           </div>
           <div className={styles.buttonRowSmallWithAdd}>
             <div className={styles.buttonRowSmallLeft}>
@@ -202,20 +222,20 @@ export default function Home() {
 
         {selectedFirst === "info" && selectedSecond !== "3" && (
           <div className={styles.bottomTip}>
-            目前的数据获取是固定的范围，如果需要更多媒体/交易所，请
+            {t("table1.tips21")}
             <a
               onClick={() => setModalOpen(true)}
               className={styles.tipLink}
               target="_blank"
               rel="noopener noreferrer"
             >
-              填写表单
+              {t("table1.tips22")}
             </a>
           </div>
         )}
         {selectedSecond === "3" && (
           <div className={styles.bottomTip}>
-            目前的Twitter数据获取是固定的范围，如果需要更多数据，请
+            {t("table1.tips11")}
             <a
               onClick={() => {
                 tablePanelRef.current.handleAddDataScope();
@@ -224,7 +244,7 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              添加数据范围
+              {t("table1.tips12")}
             </a>
           </div>
         )}
@@ -235,36 +255,38 @@ export default function Home() {
           footer={null}
           centered
           className={styles.addSourceModal}
-          title={<div className={styles.addSourceTitle}>新增来源申请</div>}
+          title={
+            <div className={styles.addSourceTitle}>{t("modal1.title")}</div>
+          }
         >
           <Form layout="vertical" onFinish={handleSubmitDataSource}>
             <Form.Item
-              label={<span>类型</span>}
+              label={<span>{t("modal1.label1")}</span>}
               name="type"
-              rules={[{ required: true, message: "请选择类型" }]}
+              rules={[{ required: true, message: t("modal1.error1") }]}
             >
               <Select
-                placeholder="请选择"
+                placeholder={t("modal1.place1")}
                 options={[
-                  { value: "1", label: "快讯" },
-                  { value: "3", label: "新闻" },
-                  { value: "2", label: "公告" },
-                  { value: "4", label: "其他" },
+                  { value: "1", label: t("secondButton.k") },
+                  { value: "3", label: t("secondButton.news") },
+                  { value: "2", label: t("secondButton.announcement") },
+                  { value: "4", label: t("secondButton.other") },
                 ]}
               />
             </Form.Item>
             <Form.Item
-              label="申请内容"
+              label={t("modal1.label2")}
               name="apply_content"
               rules={[
-                { required: true, message: "请填写申请内容" },
+                { required: true, message: t("modal1.error2") },
                 {
                   max: 300,
-                  message: "申请内容不能超过300字符",
+                  message: t("modal1.error3"),
                 },
               ]}
             >
-              <Input.TextArea rows={4} placeholder="其他原因补充" />
+              <Input.TextArea rows={4} placeholder={t("modal1.place2")} />
             </Form.Item>
             <div className={styles.addSourceBtns}>
               <Button
@@ -273,13 +295,13 @@ export default function Home() {
                 loading={modalLoading}
                 className={styles.addSourceSubmit}
               >
-                提交
+                {t("modal1.button1")}
               </Button>
               <Button
                 onClick={() => setModalOpen(false)}
                 className={styles.addSourceCancel}
               >
-                取消
+                {t("modal1.button2")}
               </Button>
             </div>
           </Form>
