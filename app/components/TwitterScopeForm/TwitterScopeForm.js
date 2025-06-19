@@ -2,7 +2,7 @@
  * @Author: diasa diasa@gate.me
  * @Date: 2025-05-12 16:43:05
  * @LastEditors: diasa diasa@gate.me
- * @LastEditTime: 2025-06-18 17:08:55
+ * @LastEditTime: 2025-06-19 16:05:21
  * @FilePath: /marketsubscription/app/components/TwitterScopeForm.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -148,7 +148,7 @@ export default function TwitterScopeForm({ handleCancel }) {
       {contextHolder}
       <div
         className={styles.keywordsBlock}
-        style={{ height: "230px", marginTop: 0, overflowY: "auto" }}
+        style={{ height: "200px", marginTop: 0, overflowY: "auto" }}
       >
         <Spin spinning={loading}>
           {scopes.map((item, idx) => (

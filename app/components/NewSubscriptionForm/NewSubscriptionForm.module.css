@@ -5,6 +5,7 @@
     justify-content: flex-end;
     display: inline-block;
     width: 120px !important;
+    line-height: 1.2 !important;
   }
 }
 .typeSelect {
